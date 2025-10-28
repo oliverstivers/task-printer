@@ -8,6 +8,7 @@ cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
+
 scanned_ids = []
 
 
@@ -42,7 +43,7 @@ while True:
             2,
         )
         id = detection.tag_id
-        if(scanned_ids.count(id) == 0):
+        if scanned_ids.count(id) == 0:
             scanned_ids.append(id)
             print(f"Detected tag: {detection.tag_id}")
 
