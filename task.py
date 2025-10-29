@@ -31,12 +31,9 @@ class Task:
         self._task_category = category
         self._task_name = name
 
+    # TODO: figure out how to format actual printed image
+    # make title a heading, bolded perhaps, etc.
     def get_receipt(self):
-        table = [
-            ["Name", self._task_name],
-            ["ID", self._task_id],
-            ["Due date: ", self.get_due_date()],
-        ]
 
         # todo: figure out task tree
 
