@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Oliver Stivers
+# Licensed under the MIT License. See LICENSE file in the project root for full license text.
+
+
 import datetime, timedelta
 import tabulate
 import uuid
@@ -43,9 +47,12 @@ class Task:
             "=" * 60,
             "",
             f"{'Due:'.ljust(12)}{self.get_due_date()}",
-            f"\n{'Time:'.ljust(12)}{self._due_date.strftime("%H:%M")}\n"
-            f"\n{'Category:'.ljust(12)}{category}\n" if category is not None else "",
-            
+            (
+                f"\n{'Time:'.ljust(12)}{self._due_date.strftime("%H:%M")}\n"
+                f"\n{'Category:'.ljust(12)}{category}\n"
+                if category is not None
+                else ""
+            ),
             "-" * 60,
             "",
             f"{str(self._task_id)[:8]}",
