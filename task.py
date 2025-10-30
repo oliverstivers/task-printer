@@ -3,7 +3,6 @@
 
 
 import datetime, timedelta
-import tabulate
 import uuid
 
 
@@ -20,9 +19,9 @@ class Task:
     _task_name = None
     _task_category = ""
     _parent_id = None
-    _child_id = None
+    _child_ids = []
 
-    def __init__(self, name, due_date, category, parentID, duration=0):
+    def __init__(self, name, due_date: datetime.datetime | None, category, duration=0):
         if due_date is None:
             self._due_date = datetime.datetime.now() + datetime.timedelta(minutes=5)
         else:
@@ -30,6 +29,7 @@ class Task:
         self._task_id = uuid.uuid4()
         self._task_category = category
         self._task_name = name
+   
 
     # TODO: figure out how to format actual printed image
     # make title a heading, bolded perhaps, etc.
@@ -56,6 +56,10 @@ class Task:
             "",
         ]
         return lines
+    
+    def add_child(self, child: Task):
+        self._child_ids.append(child._task_id)
+        child._parent_id = self._task_id
 
     def get_due_date(self):
         if self._due_date is None:
