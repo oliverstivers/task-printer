@@ -2,8 +2,11 @@
 # Licensed under the MIT License. See LICENSE file in the project root for full license text.
 
 
-import datetime, timedelta
+import datetime
 import uuid
+from enum import Enum
+
+
 
 
 # Each task will represent something i have to do
@@ -12,6 +15,12 @@ import uuid
 # "reminders" can have subtasks and methods to generate
 # we should keep track of a print time that controls when the task is printed, can be set explicitly or automatically
 class Task:
+    class Status(Enum):
+        TODO = 0
+        DOING = 1
+        DONE = 3
+
+
     _due_date = None
     _duration = 0
     _task_id = None
@@ -20,6 +29,9 @@ class Task:
     _task_category = ""
     _parent_id = None
     _child_ids = []
+    _status: Status = Status.TODO
+
+
 
     def __init__(self, name, due_date: datetime.datetime | None, category, duration=0):
         if due_date is None:
@@ -29,13 +41,16 @@ class Task:
         self._task_id = uuid.uuid4()
         self._task_category = category
         self._task_name = name
+        
    
 
     # TODO: figure out how to format actual printed image
     # make title a heading, bolded perhaps, etc.
     def get_receipt(self):
 
-        # todo: figure out task tree
+        # TODO: figure out task tree
+        # tree should travel up to the top parent and display entire chain of tasks down to the furthest leaf
+        # potentially look into anytree pip
 
         category = self._task_category
 
