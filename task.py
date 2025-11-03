@@ -8,7 +8,6 @@ from enum import Enum
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 from moms_apriltag import TagGenerator2
-import task_manager
 
 # Each task will represent something i have to do
 # can have subtasks, everything will either have a due date or a time that it will be done
@@ -102,6 +101,7 @@ class Task:
     def set_task_staus(self, status: Task.Status):
         if status == Task.Status.DONE:
             self._tag_id = None
+            import task_manager
             task_manager.TaskManager.relinquish_tag(self._tag_id)
         self._status = status
 
