@@ -1,3 +1,6 @@
 pupil_apriltags
 opencv-python
 numpy
+Pillow
+moms_apriltag
+treelib
