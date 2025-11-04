@@ -6,17 +6,12 @@ import datetime
 import pickle
 from treelib import Tree
 import random
-import json
-import os
-import time
-import scanner
 
 
 class TaskManager:
     tasks: list[Task] = []
     task_tag_map: dict[int, Task] = {}
     used_ids = set()
-    
 
     def create_default_tasks():
         # TODO: add way to create tasks from cli/user input
@@ -53,6 +48,10 @@ class TaskManager:
             with open("tasks.pkl", "rb") as f:
                 TaskManager.tasks = pickle.load(f)
                 print("Loaded tasks from file")
+            with open("tagmap.pkl", "rb") as f:
+                TaskManager.task_tag_map = pickle.load(f)
+                TaskManager.used_ids = set(TaskManager.task_tag_map.keys())
+                print("Loaded tag map from file")
         except FileNotFoundError:
             print("No saved tasks found, creating default tasks")
             TaskManager.create_default_tasks()
@@ -69,7 +68,9 @@ class TaskManager:
 
         tree.show()
 
+    # TODO: file saving for tag map since printed receipts will have that constant
     def assign_tags():
+
         for task in TaskManager.tasks:
             if task._status == Task.Status.TODO:
                 id = random.randint(0, 300)
@@ -78,27 +79,28 @@ class TaskManager:
                     task._tag_id = id
                     TaskManager.used_ids.add(id)
 
+        with open("tagmap.pkl", "wb") as f:
+            pickle.dump(TaskManager.task_tag_map, f)
+
     def relinquish_tag(id: int):
         TaskManager.task_tag_map.pop(id, None)
         TaskManager.used_ids.discard(id)
+
+    def get_task_categories():
+        categories = set()
+        for task in TaskManager.tasks:
+            if task._task_category is not None:
+                categories.add(task._task_category)
+        return list(categories)
 
 
 if __name__ == "__main__":
 
     TaskManager.load_tasks_from_file()
-
-    TaskManager.assign_tags()
-    for id in TaskManager.used_ids:
-        task: Task = TaskManager.task_tag_map[id]
-        print(str(id) + "\n".join(task.get_receipt()))
-        task.generate_image("/Users/oliverstivers/Pictures/tasks")
+    if TaskManager.task_tag_map is None:
+        TaskManager.assign_tags()
+    for task in TaskManager.tasks:
+        print(f"tag id: {task._tag_id}")
+        print("\n".join(task.get_receipt()))
 
     TaskManager.save_tasks_to_file(TaskManager.tasks)
-
-    while True:
-
-        for detection in scanner.Scanner.detections:
-            id = detection.tag_id
-            print(f"Detected tag ID: {id}")
-
-        time.sleep(1)
