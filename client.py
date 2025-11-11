@@ -6,6 +6,7 @@ from prompt_toolkit.completion import WordCompleter, Completer, Completion
 import argparse
 import pickle
 from datetime import date, timedelta
+import shlex
 
 class CustomCompleter(Completer):
     flags = ['-category', '-due']
@@ -55,7 +56,18 @@ class CustomCompleter(Completer):
 
 def parse_task_input(input: str):
     parser = argparse.ArgumentParser()
+    parser.add_argument("-n", '-name', required=True)
+    parser.add_argument("-c", '-category')
+    parser.add_argument('-d', '-due', required=True)
+    parser.add_argument('-l', '-length')
+    args = parser.parse_args(shlex.split(input))
+
+    task = Task(name=args.n, due_date=CustomCompleter.DATE_MAP.get(args.d), category=args.c)
+
+    print("\n".join(task.get_receipt()))
     
+
+
 
 
 if __name__ == "__main__":
@@ -91,6 +103,8 @@ if __name__ == "__main__":
         
         with open("categories.pkl", "wb") as f:
             pickle.dump(categories, f)
+
+        parse_task_input(task_input)
 
     elif result == 2:
         TaskManager.load_tasks_from_file()
