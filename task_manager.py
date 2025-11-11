@@ -39,9 +39,14 @@ class TaskManager:
         TaskManager.tasks.append(task4)
         TaskManager.tasks.append(task5)
 
-    def save_tasks_to_file(tasks):
+    def save_all_task_files(tasks):
         with open("tasks.pkl", "wb") as f:
             pickle.dump(tasks, f)
+        with open("tagmap.pkl", "wb") as f:
+            pickle.dump(TaskManager.task_tag_map, f)
+        with open('categories.pkl', 'wb') as f:
+            categories = TaskManager.get_task_categories()
+            pickle.dump(categories, f)
 
     def load_tasks_from_file():
         try:
@@ -91,6 +96,7 @@ class TaskManager:
         for task in TaskManager.tasks:
             if task._task_category is not None:
                 categories.add(task._task_category)
+
         return list(categories)
 
 
@@ -103,4 +109,4 @@ if __name__ == "__main__":
         print(f"tag id: {task._tag_id}")
         print("\n".join(task.get_receipt()))
 
-    TaskManager.save_tasks_to_file(TaskManager.tasks)
+    TaskManager.save_all_task_files(TaskManager.tasks)

@@ -2,6 +2,7 @@
 # Licensed under the MIT License. See LICENSE file in the project root for full license text.
 
 
+from __future__ import annotations
 import datetime
 import uuid
 from enum import Enum
@@ -36,7 +37,9 @@ class Task:
             self._due_date = datetime.datetime.now() + datetime.timedelta(minutes=5)
         else:
             self._due_date = due_date
+        self._print_time = self._due_date + datetime.timedelta(minutes=5) # print 5 minutes after due date by default
         self._task_id = uuid.uuid4()
+        self._duration = duration
         self._task_category = category
         self._task_name = name
 
@@ -125,12 +128,14 @@ class Task:
                 if category is not None
                 else ""
             ),
+            f"{'Apriltag ID: '.ljust(12)}{str(self._tag_id)}" if self._tag_id >= 0 else "",
             "-" * 60,
             "",
             f"{str(self._task_id)[:8]}",
             "",
         ]
         return lines
+    
 
     def add_child(self, child: Task):
         self._child_ids.append(child._task_id)
