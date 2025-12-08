@@ -100,6 +100,9 @@ class TaskManager:
         return list(categories)
 
 
+    def fetch_gcal_tasks():
+        pass
+
 if __name__ == "__main__":
 
     TaskManager.load_tasks_from_file()

@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 from moms_apriltag import TagGenerator2
 
+
 # Each task will represent something i have to do
 # can have subtasks, everything will either have a due date or a time that it will be done
 # potentailly have some sort of distinction between tasks that are "reminders" (i.e. midterm on this day, essay)
@@ -22,6 +23,7 @@ class Task:
         DONE = "DONE"
 
     _due_date = None
+    _recurrence = None
     _duration = 0
     _task_id = None
     _print_time = None
@@ -32,16 +34,19 @@ class Task:
     _tag_id = -1
     _status: Status = Status.TODO
 
-    def __init__(self, name, due_date: datetime.datetime | None, category, duration=0):
+    def __init__(self, name, due_date: datetime.datetime | None, category, duration=0, recurrence=None):
         if due_date is None:
             self._due_date = datetime.datetime.now() + datetime.timedelta(minutes=5)
         else:
             self._due_date = due_date
-        self._print_time = self._due_date + datetime.timedelta(minutes=5) # print 5 minutes after due date by default
+        self._print_time = self._due_date + datetime.timedelta(
+            minutes=5
+        )  # print 5 minutes after due date by default
         self._task_id = uuid.uuid4()
         self._duration = duration
         self._task_category = category
         self._task_name = name
+        self._recurrence = recurrence
 
     # TODO: figure out how to format actual printed image
     # make title a heading, bolded perhaps, etc.
@@ -54,13 +59,13 @@ class Task:
         bbox = draw.textbbox((0, 0), self._task_name, font=font)
         text_width = bbox[2] - bbox[0]
         x_centered = (img.width - text_width) // 2
-        draw.text((x_centered, 20), f"{self._task_name}\n", fill="black", font=font),
+        (draw.text((x_centered, 20), f"{self._task_name}\n", fill="black", font=font),)
 
         draw.line([(20, 60), (364, 60)], fill="black", width=2)
 
         draw.text(
             (35, 80),
-            f"{'*'.ljust(4)}{'Due: '}{ self.get_due_date()}",
+            f"{'*'.ljust(4)}{'Due: '}{self.get_due_date()}",
             fill="black",
             font=smaller_font,
         )
@@ -98,18 +103,18 @@ class Task:
             )
 
         # img.show()
-        img.save(f"{path}/task_{str(self._task_id)[:8]}.png") 
+        img.save(f"{path}/task_{str(self._task_id)[:8]}.png")
         # NOTE: probably will want to uncomment later, in testing we are using pil.show
 
     def set_task_staus(self, status: Task.Status):
         if status == Task.Status.DONE:
             self._tag_id = None
             import task_manager
+
             task_manager.TaskManager.relinquish_tag(self._tag_id)
         self._status = status
 
     def get_receipt(self):
-
         # TODO: figure out task tree
         # tree should travel up to the top parent and display entire chain of tasks down to the furthest leaf
         # potentially look into anytree pip
@@ -123,23 +128,30 @@ class Task:
             f"{'Due:'.ljust(12)}{self.get_due_date()}\n",
             f"{'Status:'.ljust(12)}{str(self._status.value)}",
             (
-                f"\n{'Time:'.ljust(12)}{self._due_date.strftime("%H:%M")}\n"
+                f"\n{'Time:'.ljust(12)}{self._due_date.strftime('%H:%M')}\n"
                 f"\n{'Category:'.ljust(12)}{category}\n"
                 if category is not None
                 else ""
             ),
-            f"{'Apriltag ID: '.ljust(12)}{str(self._tag_id)}" if self._tag_id >= 0 else "",
+            f"{'Apriltag ID: '.ljust(12)}{str(self._tag_id)}"
+            if self._tag_id >= 0
+            else "",
             "-" * 60,
             "",
             f"{str(self._task_id)[:8]}",
             "",
         ]
         return lines
-    
 
     def add_child(self, child: Task):
         self._child_ids.append(child._task_id)
         child._parent_id = self._task_id
+
+    def get_parent_task(self):
+        return self._parent_id
+
+    def get_children(self):
+        return self._child_ids
 
     def get_due_date(self):
         if self._due_date is None:
