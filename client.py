@@ -128,7 +128,6 @@ if __name__ == "__main__":
             "Enter task details: ",
             completer=completer,
         )
-
         with open("categories.pkl", "wb") as f:
             pickle.dump(categories, f)
 
@@ -142,7 +141,6 @@ if __name__ == "__main__":
 
         for task in TaskManager.tasks:
             print("\n".join(task.get_receipt()))
-
     elif result == 3:
         tag_id_str = session.prompt("Enter Apriltag ID: ")
         try:
