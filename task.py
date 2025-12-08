@@ -10,7 +10,6 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 from moms_apriltag import TagGenerator2
 
-
 # Each task will represent something i have to do
 # can have subtasks, everything will either have a due date or a time that it will be done
 # potentailly have some sort of distinction between tasks that are "reminders" (i.e. midterm on this day, essay)
