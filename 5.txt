@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Edit page title -->
+    <title>CSE 333 25au Exercise 6</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400italic,600' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- This script dynamically loads CSS and JS files from the course base directory -->
+    <!-- Only edit if you want to change the paths to your JS/CSS sources -->
+    <script>
+      // Get the base path for the course web by extracting 'courses' + courseName + quarter
+      var fullPathArray = window.location.pathname.split('/');
+      var basePathArray = fullPathArray.slice(0,4);
+      var basePath = basePathArray.join('/');
+
+      // CSS files to load
+      var cssSources = [
+        '/site/css/bootstrap.min.css',
+        '/site/css/main.css',
+      ];
+
+      // Javscript files to load
+      var jsSources = [
+        '/site/js/jquery.min.js',
+        '/site/js/bootstrap.min.js',
+        '/site/js/nav-bar.js',
+        '/site/js/footer.js'
+      ];
+
+      // Include the script that will load the CSS & Javscript files
+      document.write("<script src=\'" + basePath + "/site/js/load-sources.js\'><\/script>");
+    </script>
+
+  </head>
+
+  <body>
+    <header class="site-header">
+    <!-- Javascript will load the navigation bar code here. -->
+    </header>
+
+    <div class="container">
+
+      <!-- Begin page content -->
+
+      <h1>CSE 333 25au Exercise 6</h1>
+
+<p>
+<b>out:</b> Monday, October 6, 2025<br>
+ <b>due:</b> Wednesday, October 8, 2025 by <b>10:00 am</b>,
+ <b>No late exercises accepted</b>.
+</p>
+
+
+<p><b>Goals: </b>Learn how to use various parts of the standard C file I/O
+library, particularly ones that will be needed on later projects.  Also reenforce
+understanding of exactly what is in a file that is stored on the disk.</p>
+
+  <p><b>Description: </b>
+     Write a C program that accepts a filename as a single
+     command-line argument.  The program should read the file,
+     copying the contents of the file to <code>stdout</code> in reverse order, character
+     by character (or, more precisely, byte by byte).
+     </p>
+
+     <p>
+     For example, consider a file name <code>foo.txt</code> in the
+     current directory that contains the
+     following 7 bytes (the 7th byte is the newline character at the end):
+     <blockquote><pre>hello!
+</pre></blockquote>
+     Running the program should result in the following:
+     <blockquote><pre>
+<b>bash$</b> ./ex6 foo.txt
+
+!olleh<b>bash$</b></pre></blockquote>
+     Pay careful attention to where the newline and other characters
+     are in this output.<br>
+     </p>
+
+	<p>You will need to use several standard library calls in order to
+       do this.  In particular, you should use:
+       <ul>
+         <li> <code>fopen</code>, with mode "rb", to open the file</li>
+         <li> <code>fclose</code> to close the file</li>
+         <li> <code>fseek</code> and <code>ftell</code> to figure out
+           how large the file is.  (We'd suggest you
+           <code>fseek(f, 0, SEEK_END);</code> and then <code>size =
+             ftell(f);</code> to get the file size, in bytes.)</li>
+         <li> <code>fseek</code> and <code>fread</code> to read the
+           file's contents, in reverse order, byte-by-byte.</li>
+         <li> <code>printf</code>, with the <code>%c</code> format code, to print out the
+           characters (bytes) of the file one at a time.</li>
+       </ul>
+       </p>
+
+    <p>Your code should read the bytes one-at-a-time and print them
+    immediately.  Do not read the entire file into memory and print it
+    backwards or create a reversed copy of the data and print that. A goal
+    of this exercise is to gain experience with the various file I/O
+    functions described above.</p>
+
+	<p>Remember to consult the
+       <a href="http://www.cplusplus.com/reference/">C/C++ Reference Material</a>
+       and <a href="https://man7.org/linux/man-pages/index.html">Linux manual pages</a>
+       to learn how to use each of these functions. (Check
+       out the <code>stdio.h</code> header)</p>
+
+	<p>Note: Some of these library functions are quite old and have parameters or results
+	whose type is <code>long</code>.  Style guides and programs like
+	<code>cpplint</code> generally discourage using <code>long</code>
+	and recommend using types like <code>int64_t</code> instead.
+	But for these library functions it's appropriate
+	to use variables of type <code>long</code> to match function
+	parameter and result types, since that guarantees an exact match
+	regardless of the exact size of <code>long</code> on the underlying
+	machine.  Feel free to ignore any <code>cpplint</code>
+	warnings about using <code>long</code> in these situations.</p>
+
+	<p>Hint: you can use linux commands like <code>hexdump -C foo.txt</code> or
+	<code>hexdump -c foo.txt</code> to look at the bytes in a file <code>foo.txt</code>
+	in hex and in other formats
+	to see exactly what's there, including invisible characters.
+	Many text editors also have modes to do this.</p>
+
+  <p>
+
+  <hr>
+  <p>Your code must:
+  <ul>
+    <li> compile without errors or warnings on CSE Linux machines
+	(lab workstations, attu, or CSE home VM)</li>
+
+    <li> have no crashes, memory leaks, or memory errors on CSE linux machines
+    (Suggestion: <code>valgrind</code>)</li>
+
+    <li> be contained in a single file called <code>ex6.c</code>
+    that compiles with the command <code>gcc -Wall -g -std=c17 -o ex6 ex6.c</code> -- do
+    not submit a Makefile.</li>
+
+    <li> be pretty: the formatting, modularization, variable and
+    function names, and so on must make us smile rather than cry.
+    (Suggestion: <code>cpplint --clint</code>)
+	</li>
+
+    <li> be robust: you should think about handling bogus input
+    from the user (if any), and you should handle hard-to-handle cases
+    (if there are any) gracefully.</li>
+
+    <li> have a comment at the top of the source file with your name,
+    and CSE or UW email address.</li>
+  </ul>
+  <p>
+
+  <p>
+  You should submit your exercise using the Gradescope dropbox linked on the
+course resources web page.</p>
+
+
+      <!-- End page content -->
+
+    </div>
+
+    <footer class="site-footer">
+    <!-- Javascript will load the footer code here. -->
+    </footer>
+
+  </body>
+
+</html>

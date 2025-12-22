@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Edit page title -->
+    <title>CSE 333 25au Exercise 2</title>
+ 
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400italic,600' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- This script dynamically loads CSS and JS files from the course base directory -->
+    <!-- Only edit if you want to change the paths to your JS/CSS sources -->
+    <script>
+      // Get the base path for the course web by extracting 'courses' + courseName + quarter
+      var fullPathArray = window.location.pathname.split('/');
+      var basePathArray = fullPathArray.slice(0,4);
+      var basePath = basePathArray.join('/');
+
+      // CSS files to load
+      var cssSources = [
+        '/site/css/bootstrap.min.css',
+        '/site/css/main.css',
+      ];
+
+      // Javscript files to load
+      var jsSources = [
+        '/site/js/jquery.min.js',
+        '/site/js/bootstrap.min.js',
+        '/site/js/nav-bar.js',
+        '/site/js/footer.js'
+      ];
+  
+      // Include the script that will load the CSS & Javscript files
+      document.write("<script src=\'" + basePath + "/site/js/load-sources.js\'><\/script>");
+    </script>
+
+  </head>
+  
+  <body>
+    <header class="site-header">
+    <!-- Javascript will load the navigation bar code here. -->
+    </header>
+
+    <div class="container">
+          
+      <!-- Begin page content -->
+      
+      <h1>CSE 333 25au Exercise 2</h1>
+
+<p>
+<b>out:</b> Monday, September 29, 2025<br>
+ <b>due:</b> Wednesday, October 1, 2025 by <b>10:00 am</b>.
+ <b>No late exercises accepted.</b>
+</p>
+<p><b>Goals: </b>Use pointers to access and print arbitrary memory
+bytes and addresses, and explore C data structure representation in memory.</p>
+
+<p><b>Description: </b>  
+   Your job is to write a C function that prints, in hex, the values
+     of the bytes allocated to some variable.  The function's prototype is
+     <pre>void PrintBytes(void* mem_addr, int num_bytes);</pre>
+     and its output looks like this:
+     <pre>The 4 bytes starting at 0x7fff1081856c are: ff 01 30 4e</pre>
+	 You should use the following <code>main</code> function in the program you submit
+     (you should be able to copy and paste this code from the assignment web
+     page rather than having to re-type it):
+<pre>int main(int argc, char **argv) {
+  char     char_val = '0';
+  int32_t  int_val = 1;
+  float    float_val = 1.0;
+  double   double_val  = 1.0;
+
+  typedef struct {
+    char     char_val;
+    int32_t  int_val;
+    float    float_val;
+    double   double_val;
+  } Ex2Struct;
+
+  Ex2Struct struct_val = { '0', 1, 1.0, 1.0 };
+
+  PrintBytes(&char_val, sizeof(char));
+  PrintBytes(&int_val, sizeof(int32_t));
+  PrintBytes(&float_val, sizeof(float));
+  PrintBytes(&double_val, sizeof(double));
+  PrintBytes(&struct_val, sizeof(struct_val));
+
+  return EXIT_SUCCESS;
+}</pre>
+
+<p>
+     Your implementation of <code>PrintBytes</code> will need to
+     do a few things:
+     <ul>
+       <li> convince the compiler to let you access bytes in memory,
+        given the address of the first byte to be printed as
+	    a <code>void*</code> pointer value.
+       </li>
+       
+       <li> use a loop to iterate once for each byte in the variable,
+       using a pointer to extract that byte and print it.
+       </li>
+
+       <li> figure out how to use format specifiers to <code>printf</code> in order
+       to print out an <code>uint8_t</code> byte in lower-case hexadecimal, using
+       exactly two digits.  As a hint, take inspiration from this
+       code:
+       <blockquote><pre>
+#include &lt;inttypes.h&gt;
+...
+  uint8_t a_byte = 0xD1;
+  printf("The byte is: %02" PRIx8 " -- enjoy!\n", a_byte);
+...</pre></blockquote>
+       </li>
+
+       <li> figure out how to print a pointer value.</li>
+     </ul>
+     </p>
+     
+     <p>
+  Your code should produce output that is identical to the following,
+  except for values that might change from one execution to the next because of
+  randomness outside of your control.  That randomness includes variable
+  addresses and the values of uninitialized data or padding bytes.
+<pre><code><b>$bash</b> gcc -Wall -std=c17 -g -o ex2 ex2.c
+<b>$bash</b> ls
+ex2 ex2.c
+<b>$bash</b> ./ex2
+The 1 bytes starting at 0x7fff3c84a1ff are: 30
+The 4 bytes starting at 0x7fff3c84a1f4 are: 01 00 00 00
+The 4 bytes starting at 0x7fff3c84a1f8 are: 00 00 80 3f
+The 8 bytes starting at 0x7fff3c84a1e8 are: 00 00 00 00 00 00 f0 3f
+The 24 bytes starting at 0x7fff3c84a1d0 are: 30 b0 f0 00 01 00 00 00 00 00 80 3f 00 00 00 00 00 00 00 00 00 00 f0 3f
+</code></pre> (Note that the last output line is actually a single
+line, but probably wraps in your browser. Also, note that the
+number of bytes shown on the last line is not the sum of the number of bytes
+shown on the previous lines because of uninitialized padding bytes in the struct
+used to align the struct fields.)</p>
+
+<p>You must not alter the given <code>main</code> function code.
+If you notice any style issues with it,
+ignore them and focus on getting your new code right.</p>
+  
+<p>Your code must:
+  <ul>
+    <li>compile without errors or warnings on current CSE Linux machines
+(lab workstations, attu, or CSE home VM)</li>
+    
+    <li>have no crashes, memory leaks, or memory errors on CSE linux machines
+    (note: if you check your program with valgrind,
+    it may report that your program is reading uninitialized bytes;  
+    that is not an error if, in fact, that's what the code is supposed to
+    actually be doing).</li>
+    
+    <li>be contained in a single file called <code>ex2.c</code>
+    that compiles with the command <code>gcc -Wall -g -std=c17 -o ex2 ex2.c</code> --
+    do not submit a Makefile.  </li>
+    
+    <li>be pretty: the formatting, modularization, variable and
+    function names, and so on must make us smile rather than cry.
+    (Suggestion: use <code>cpplint.py --clint</code> from hw0 to check for potential style problems.)</li>
+
+    <li>be robust: you should think about handling bogus input
+    from the user (if any), and you should handle hard-to-handle cases
+    (if there are any) gracefully.</li>
+
+    <li>have a comment at the top of your <code>.c</code> file with your name,
+    and CSE or UW email address.</li>
+  </ul>
+  </p> 
+
+  <p>
+  You should submit your exercise using the Gradescope dropbox linked on the
+course resources web page.</p>
+
+    
+      <!-- End page content -->
+
+    </div>
+
+    <footer class="site-footer">
+    <!-- Javascript will load the footer code here. -->
+    </footer>
+
+  </body>
+
+</html>

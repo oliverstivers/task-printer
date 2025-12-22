@@ -1,0 +1,346 @@
+here is an assignment. in the future, you will be given a list of assignments. extract details from this assignment and plan when i should work on it. additionally, give a very concise command in the form: [assignment name], [due date], [assignment category]
+
+
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Exercise 0 - CSE 333</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400italic,600' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+    <script>
+      // Get the path to the root of the course website
+      var fullPathArray = window.location.pathname.split('/');
+      var basePathArray = fullPathArray.slice(0,4);
+      var basePath = basePathArray.join('/');
+
+      // CSS files to load
+      var cssSources = [
+        '/site/css/bootstrap.min.css',
+        '/site/css/main.css',
+      ];
+
+      // Javscript files to load
+      var jsSources = [
+        '/site/js/jquery.min.js',
+        '/site/js/nav-bar.js',
+        '/site/js/footer.js',
+        '/site/js/popover.js',
+        '/site/js/bootstrap.min.js'
+      ];
+
+      // Include the script that will load the CSS & Javscript files
+      document.write("<script src=\'" + basePath + "/site/js/load-sources.js\'><\/script>");
+    </script>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <!-- Javascript will load the navigation bar code here. -->
+    </header>
+
+    <div class="container">
+
+    <!-- Begin page content -->
+
+    <h1>CSE333 Exercise 0</h1>
+
+    <p class="afterh">
+      <div class="staff-profile">
+        <b>Out:</b> &nbsp; Wednesday, September 24<br>
+        <b>Due:</b> &nbsp; Friday, September 26 by <span class="red-text">10 am</span><br>
+        <b>Rating:</b> &nbsp; 3
+        (<a class="staff-popover">note</a>)
+        <div class="staff-blurb-title">
+  CSE 333 Exercise Rating Scale
+</div>
+<div class="staff-blurb-content">
+  <p>
+	Each exercise this quarter is rated on a integer scale of 1 &ndash; 5,
+	inclusive, with 1 being the "least time-consuming" and 5 being the "most
+	time-consuming".
+  </p>
+
+  <p>
+    This difficulty scale is meant as a rough guide for you in predicting the
+	amount of time to set aside for each exercise as you balance the work
+	required for 333 with your other obligations.
+	However, it is necessarily imperfect as everyone's set of circumstances and
+	experiences with the exercises differ.
+	If your experience with an exercise does not align with its rating, that is
+	not a reflection of you or your abilities.
+  </p>
+</div>
+
+      </div>
+    </p>
+
+      <!-- Assignment Spec Nav Bar Menu -->
+      <script>
+        var pagelinks =
+                '<a href="#" class="dropdown-toggle" id="dropdownMenu7" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">EX0</a>'
+                + '<ul class="dropdown-menu" aria-labelledby="dropdownMenu7">'
+                + '<li><a href="#goals">Goals</a></li>'
+                + '<li><a href="#background">Background</a></li>'
+                + '<li><a href="#descr">Description</a></li>'
+                + '<li><a href="#impl_notes" class="indent">Implementation Notes</a></li>'
+                + '<li><a href="#style">Style Focus</a></li>'
+                + '<li><a href="#submit">Submission</a></li>'
+                + '</ul>';
+      </script>
+
+
+    <section id="goals">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h2>Goals</h2></div>
+      <div class="panel-body">
+        <ul>
+          <li>Write a C Program from scratch.</li>
+          <li>Write code that utilizes command-line arguments and C-string parsing.</li>
+          <li>Write code that uses function declarations.</li>
+          <li>Read C documentation to learn how C standard library functions behave.</li>
+          <li>Use the linter and valgrind.</li>
+        </ul>
+      </div>
+    </div>
+    </section>
+
+
+    <section id="background">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h2>Background</h2></div>
+      <div class="panel-body">
+        <p>
+          One way to estimate &#x03C0; is to use the following infinite series,
+            which was discovered by Nilakantha in the 15th century:
+        </p>
+<pre>
+&#x03C0; = 3 + (4 / (2 x 3 x 4)) - (4 / (4 x 5 x 6)) + (4 / (6 x 7 x 8)) - ...
+</pre>
+        <p>
+          Breaking the series down:
+        </p>
+          <ul>
+          <li>The zero'th term in the series is: <tt>3</tt></li>
+          <li>The first term in the series is: <tt>+(4 / (2 x 3 x 4))</tt></li>
+          <li>The second term in the series is: <tt>-(4 / (4 x 5 x 6))</tt></li>
+          <li>The n'th term in the series is: <tt>(-1)<sup>(n+1)</sup> &middot; (4 / (2n &middot; (2n+1) &middot; (2n+2)))</tt></li>
+        </ul>
+      </div>
+    </div>
+    </section>
+
+
+    <section id="descr">
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>Problem Description</h2></div>
+        <div class="panel-body">
+
+  <p>Write a C program that estimates &#x03C0; by adding together terms 0
+  through n, <b><em>inclusive</em></b>, in the Nilakantha series, and prints
+  out that estimate to <em>20 decimal places</em>.</p>
+  <ul>
+    <li>"n" is provided to your program as a command-line argument, which you
+      should attempt to parse as an <code>int</code>.</li>
+    <li>You should compile your program into an executable called
+      <code>ex0</code>.</li>
+    <li>Example executions and their resulting outputs are shown below.
+        <em>Make sure that your submission matches these outputs exactly!</em>
+<pre>
+$ <b>gcc -Wall -g -std=c17 -o ex0 ex0.c</b>
+$ <b>ls</b>
+ex0     ex0.c
+$ <b>./ex0 100</b>
+Our estimate of Pi is 3.14159241097198238535
+$
+</pre>
+    </li>
+  </ul>
+
+  <hr>
+  <section id="impl_notes">
+  <h3 class="aftersec">Implementation Notes</h3>
+
+  <h4>Libraries</h4>
+  <p>
+    As part of this exercise you will need to explore some of the basic C
+    libraries in order to convert the command-line argument (the string of
+    digit characters) to an <code>int</code> value and print the result.
+    The nav bar above links you to <a href="http://www.cplusplus.com/reference">
+    www.cplusplus.com/reference</a> as the "C/C++ Reference", which contains
+    information about the C and C++ libraries (ignore the C++ info for now).
+  </p>
+  <ul>
+    <li>In particular, you will find it useful to look at (1) the <code>stdio.h</code>
+      library for basic input and output, (2) <code>string.h</code> for handling
+      C-strings (<em>i.e.</em>, null-terminated arrays of characters), and (3)
+      <code>stdlib.h</code> for some useful functions.</li>
+    <li>There are multiple ways to parse (convert) strings of digit characters
+      to integer values, including <code>sscanf</code>, <code>atoi</code>, and
+      others; think about the tradeoffs and differences between them.</li>
+    <li>You are allowed to use any standard library function that does not
+      require additional compilation options (see Submission details
+      <a href="#submit">below</a>).
+      In particular, you may not use functions from the <code>math.h</code>
+      library.</li>
+  </ul>
+
+  <h4>User Input</h4>
+  <p>
+    You should handle various inputs from the user, which may be in an
+    unexpected format.
+    For each input, you should take some time to reason through your options
+    for handling it gracefully (<em>i.e.</em>, without unexpectedly crashing),
+    decide which one seems "best", and document your decision in your code.
+    Note that you do not need to give a fully detailed explanation; short
+    well-written comments are fine.
+    Example unexpected inputs for this exercise include, but are not limited to:
+  </p>
+  <ul>
+    <li><pre>$ <b>./ex0</b></pre></li>
+    <li><pre>$ <b>./ex0 hello</b></pre></li>
+    <li><pre>$ <b>./ex0 0.05432</b></pre></li>
+    <li><pre>$ <b>./ex0 10000000 3234</b></pre></li>
+  </ul>
+  <p>
+    For simplicity, one case you can ignore is when someone inputs an integer
+    that is too large to fit into an <code>int</code> data type
+    (<em>e.g.</em>, 2<sup>351</sup> is too big to fit into 32 bits).
+  </p>
+
+  <h4>Arithmetic</h4>
+  <p>
+    To avoid floating-point arithmetic errors, please make sure your code
+    adheres to the following rules:
+  </p>
+  <ol>
+    <li>Use C's <code>double</code> type for intermediate and final results.</li>
+    <li>Sum the series in order from term 0 to term n (and not the other way around).</li>
+  </ol>
+  </section>
+
+        </div>
+    </div>
+  </section>
+
+  <section id="style">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h2>Style Focus</h2></div>
+      <div class="panel-body">
+
+        <h4>General</h4>
+        <p>
+          As a starting point, get comfortable with the C best practices
+          mentioned in the first lecture, particularly focusing on <b>program
+          layout</b> and <b>function ordering</b>.
+        </p>
+        <p>
+          Other style issues to keep in mind, even though not discussed in
+          lecture, include: indenting your code consistently, factoring out
+          code into helper functions when appropriate, and writing an adequate
+          amount of useful comments.
+        </p>
+
+        <h4>User Input</h4>
+        <p>
+          You will also be expected to be <b>robust in handling user input</b>,
+          which includes handling unexpected inputs.
+          Refer to <a href=#impl_notes>the section above</a> for more details.
+        </p>
+
+        <h4>Tools</h4>
+        <p>
+          <span class="red-text">Make sure that you run the linter
+          (<code>./cpplint.py --clint ex0.c</code>) and valgrind
+          (<code>valgrind ./ex0 &lt;input&gt;</code>) on your code and resolve
+          any indicated issues before submitting.</span>
+          <ul>
+            <li>See the
+              <a href="../cpplint.html#download"><button type="button" class="btn btn-default btn-xs link-button"><img src="../site/img/icon_txt.png"/>cpplint page</button></a>
+              for how to obtain a copy of the linter.
+            <li><span class="red-text">For this exercise only:</span> you may
+              ignore the error &quot;sscanf can be ok, but is slow and can
+              overflow buffers&quot;.</li>
+            <li>When you have fixed all linter errors, you should see the
+              following output from <code>clint.py</code>:
+<pre>$ <b>./cpplint.py --clint ex0.c</b>
+Done processing ex0.c
+</pre>
+            </li>
+            <li>For <em>each</em> choice of <tt>&lt;input&gt;</tt>, you should
+              be looking to see the following line of output from
+              <code>valgrind</code>:
+<pre>
+$ <b>valgrind ./ex0 &lt;input&gt;</b>
+...
+ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+</pre>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+    </section>
+
+
+    <section id="submit">
+      <div class="panel panel-default">
+        <div class="panel-heading"><h2>Submission</h2></div>
+        <div class="panel-body">
+
+          <p>
+            You will submit:
+            <code>ex0.c</code>.
+          </p>
+
+          <p>For full credit, your code must:</p>
+          <ul>
+            <li>Compile without errors or warnings on CSE Linux machines
+              (lab workstations, <code>attu</code>, or CSE home VM).</li>
+            <li>Have no runtime errors, memory leaks, or memory errors
+              (<code>gcc</code> and <code>valgrind</code>).</li>
+            <li>Be contained in the file listed above that compiles with the
+              command:<br>
+              <pre>$ <b>gcc -Wall -g -std=c17 -o ex0 ex0.c</b></pre>
+              </li>
+              <ul>
+                <li><code>math.h</code> is disallowed because it won't work
+                  without the addition of the <code>-lm</code> option.</li>
+              </ul>
+            <li>Have a comment at the top of your <code>.c</code> file with
+              your name(s) and CSE or UW email address(es).</li>
+            <li>Be pretty: the formatting, modularization, variable and
+              function names, commenting, and so on should be consistent with
+              class style guidelines.
+              Additionally, the linter shouldn't have any complaints about your
+              code (<code>cpplint.py --clint</code>).</li>
+            <li>Be robust: your code should deal with hard-to-handle/edge cases
+              and bogus user input (if there are any) gracefully.</li>
+          </ul>
+          <p>
+            Submit your code on <a href="../submit.php">
+            <button type="button" class="btn btn-default btn-xs link-button">
+            <img class="link-icon" src="../site/img/icon_gradescope.png" /> Gradescope</button></a>.
+          </p>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- End page content -->
+
+    </div>
+
+    <footer class="site-footer">
+      <!-- Javascript will load the footer code here. -->
+    </footer>
+
+  </body>
+
+</html>
