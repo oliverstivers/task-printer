@@ -5,10 +5,12 @@
 from __future__ import annotations
 import datetime
 import uuid
+import task_manager
 from enum import Enum
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 from moms_apriltag import TagGenerator2
+
 
 # Each task will represent something i have to do
 # can have subtasks, everything will either have a due date or a time that it will be done
@@ -30,10 +32,19 @@ class Task:
     _task_category = ""
     _parent_id = None
     _child_ids = []
-    _tag_id = -1
+    _tag_id: int = -1
     _status: Status = Status.TODO
 
-    def __init__(self, name, due_date: datetime.datetime | None, category, duration=0, recurrence=None):
+    _outdated = False
+
+    def __init__(
+        self,
+        name,
+        due_date: datetime.datetime | None,
+        category,
+        duration=0,
+        recurrence=None,
+    ):
         if due_date is None:
             self._due_date = datetime.datetime.now() + datetime.timedelta(minutes=5)
         else:
@@ -47,9 +58,19 @@ class Task:
         self._task_name = name
         self._recurrence = recurrence
 
+        self._printed_fields = [
+            self._task_name,
+            self._due_date,
+            self._recurrence,
+            self._duration,
+            self._task_id,
+            self._task_category,
+            self._tag_id,
+        ]
+
     # TODO: figure out how to format actual printed image
     # make title a heading, bolded perhaps, etc.
-    def generate_image(self, path=""):
+    def generate_image(self, path="") -> Image.Image:
         img = Image.new("RGB", (384, 600), "white")  # 384px = thermal printer width
         draw = ImageDraw.Draw(img)
         font = ImageFont.truetype("Courier", 24)
@@ -101,16 +122,12 @@ class Task:
                 (tag_text_x, tag_text_y), tag_text, fill="black", font=smaller_font
             )
 
-        # img.show()
         img.save(f"{path}/task_{str(self._task_id)[:8]}.png")
-        # NOTE: probably will want to uncomment later, in testing we are using pil.show
+        return img
 
     def set_task_staus(self, status: Task.Status):
         if status == Task.Status.DONE:
-            self._tag_id = None
-            import task_manager
-
-            task_manager.TaskManager.relinquish_tag(self._tag_id)
+            task_manager.relinquish_tag(self._tag_id)
         self._status = status
 
     def get_receipt(self):
@@ -151,6 +168,13 @@ class Task:
 
     def get_children(self):
         return self._child_ids
+
+    # updates the field in the task it's called on to contain
+    def update_task(self, new_task: Task):
+        # if the task has been printed, we also track that this task is out of date
+        if self._print_time is not None:
+            self._outdated = True
+        self.__dict__.update(new_task.__dict__)
 
     def get_due_date(self):
         if self._due_date is None:
