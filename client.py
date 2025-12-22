@@ -1,4 +1,4 @@
-from task_manager import TaskManager
+import task_manager
 from task import Task
 from prompt_toolkit import prompt, print_formatted_text, HTML, PromptSession
 from prompt_toolkit.shortcuts import choice
@@ -63,7 +63,6 @@ class CustomCompleter(Completer):
                     yield Completion(date_option, start_position=-len(current_word))
 
 
-
 def parse_task_input(input: str):
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "-name", required=True)
@@ -74,7 +73,7 @@ def parse_task_input(input: str):
     # TODO: potentially explore ways to have a more flexible recurrence interval?
     parser.add_argument("-r", "-recurrence")
     # parses a list of arguments - separate child IDs with spaces
-    parser.add_argument("-k", "-children", nargs='+')
+    parser.add_argument("-k", "-children", nargs="+")
     args = parser.parse_args(shlex.split(input))
     task = Task(
         name=args.n, due_date=CustomCompleter.DATE_MAP.get(args.d), category=args.c
@@ -102,8 +101,8 @@ if __name__ == "__main__":
         options=[(1, "Add Task"), (2, "View Tasks"), (3, "Get task from Apriltag")],
     )
     if result == 1:
-        TaskManager.load_tasks_from_file()
-        categories = TaskManager.get_task_categories()
+        task_manager.load_tasks_from_file()
+        categories = task_manager.get_task_categories()
 
         with open("categories.pkl", "rb") as f:
             try:
@@ -134,19 +133,19 @@ if __name__ == "__main__":
         parse_task_input(task_input)
 
     elif result == 2:
-        TaskManager.load_tasks_from_file()
-        if TaskManager.task_tag_map is None or len(TaskManager.task_tag_map) == 0:
-            TaskManager.assign_tags()
-            TaskManager.save_all_task_files(TaskManager.tasks)
+        task_manager.load_tasks_from_file()
+        if task_manager.task_tag_map is None or len(task_manager.task_tag_map) == 0:
+            task_manager.assign_tags()
+            task_manager.save_all_task_files()
 
-        for task in TaskManager.tasks:
+        for task in task_manager.tasks:
             print("\n".join(task.get_receipt()))
     elif result == 3:
         tag_id_str = session.prompt("Enter Apriltag ID: ")
         try:
             tag_id = int(tag_id_str)
-            TaskManager.load_tasks_from_file()
-            task = TaskManager.task_tag_map.get(tag_id, None)
+            task_manager.load_tasks_from_file()
+            task = task_manager.task_tag_map.get(tag_id, None)
             if task is not None:
                 print("\n".join(task.get_receipt()))
             else:
@@ -161,3 +160,6 @@ if __name__ == "__main__":
                     f'<white bg="red">Invalid Apriltag ID entered: {tag_id_str}</white>'
                 )
             )
+
+
+
