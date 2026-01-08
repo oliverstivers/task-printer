@@ -45,18 +45,22 @@ def save_all_task_files():
         pickle.dump(categories, f)
 
 
-def load_tasks_from_file():
+def load_tasks_from_file() -> list[Task]:
     """Load tasks from pickle files or create defaults"""
     global tasks, task_tag_map, used_ids
 
     try:
         with open("tasks.pkl", "rb") as f:
             tasks = pickle.load(f)
+            tasks_copy = tasks
+            
             print("Loaded tasks from file")
+
         with open("tagmap.pkl", "rb") as f:
             task_tag_map = pickle.load(f)
             used_ids = set(task_tag_map.keys())
             print("Loaded tag map from file")
+        return tasks_copy
     except FileNotFoundError:
         print("No saved tasks found, creating default tasks")
         create_default_tasks()

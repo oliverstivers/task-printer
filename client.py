@@ -6,8 +6,8 @@ from prompt_toolkit.completion import WordCompleter, Completer, Completion
 import argparse
 import pickle
 import gcal_quickstart
-from datetime import date, timedelta
-from openai import OpenAI 
+from datetime import date, datetime, timedelta
+from openai import OpenAI
 import shlex
 
 
@@ -77,8 +77,13 @@ def parse_task_input(input: str):
     # parses a list of arguments - separate child IDs with spaces
     parser.add_argument("-k", "-children", nargs="+")
     args = parser.parse_args(shlex.split(input))
+    due_date_val = CustomCompleter.DATE_MAP.get(args.d)
     task = Task(
-        name=args.n, due_date=CustomCompleter.DATE_MAP.get(args.d), category=args.c
+        name=args.n,
+        due_date=datetime.combine(due_date_val, datetime.min.time())
+        if due_date_val
+        else None,
+        category=args.c,
     )
 
     print("\n".join(task.get_receipt()))
@@ -86,46 +91,73 @@ def parse_task_input(input: str):
 
 # fetches tasks from connected calendars from the current time until time specified by timespan
 def recommend_tasks_from_calendars(timespan: timedelta):
-    calendar_tasks = gcal_quickstart.fetch_tasks_in_time_span(timespan) 
-    # calendar tasks include things like lecture, which is not important for task recommendation 
+    calendar_tasks = gcal_quickstart.fetch_tasks_in_time_span(timespan)
+    # calendar tasks include things like lecture, which is not important for task recommendation
     # we pass these tasks into an llm to analyze which are actual assignments/tasks that need to be done
-    client = OpenAI(
-        base_url="http://localhost:8080/v1",
-        api_key="na"
-    )  
+    client = OpenAI(base_url="http://localhost:8080/v1", api_key="na")
     response = client.chat.completions.create(
         model="local",
         messages=[
-            {"role": "user", "content": f"Here is a list of calendar events from my canvas calendar. It includes both assignments and lectures. I want you to separate tasks I actually need to do from lectures: {calendar_tasks}. Identify which of these are tasks or assignments that I need to complete, and return them as a list."}
+            {
+                "role": "user",
+                "content": f"Analyze this list of calendar events: {calendar_tasks}. Identify actionable tasks or assignments (e.g., homework, projects, deadlines, exams) that require completion, and ignore non-actionable events like lectures, classes, meetings, or informational sessions. For each actionable task, provide a brief summary including the task name, due date if mentioned, and any key details. Return them as a simple, readable numbered list, like: 1. Task Name - Due: date - Details.",
+            }
         ],
         temperature=0.2,
-        max_tokens=400
-    ) 
+        max_tokens=400,
+    )
     print("Recommended tasks from calendar analysis:")
     print(response.choices[0].message.content)
 
     pass
 
+
 # schudle tasks due for current day based on current gcal schedule
 # if add breaks is True, add breaks between tasks where possible (default 15 minutes  )
 def auto_schedule_tasks_for_day(add_breaks: bool = True, break_length: int = 15):
     # get current schedule from gcal
-    
-    pass
+    gcal_schedule = gcal_quickstart.get_current_schedule_in_span(timedelta(days=1))
+    # also load tasks from file
+    tasks = task_manager.load_tasks_from_file()
+    print(f"{gcal_schedule}")
+    tasks_schedule = "\n".join(task.get_string_for_schedule() for task in tasks)
+    print(tasks_schedule)
+    client = OpenAI(base_url="http://100.104.230.28:8080/v1", api_key="na")
+    response = client.chat.completions.create(
+        model="local",
+        messages=[
+            {
+                "role": "user",
+                "content": f"Based on the current Google Calendar schedule: {gcal_schedule} and the pending tasks with their details: {tasks_schedule}, suggest optimal scheduling times for the tasks today. Avoid conflicts with existing calendar events, consider task durations and due dates, and add {break_length}-minute breaks between tasks if {add_breaks}. Return only a concise numbered list with task names and suggested start times. No explanations or additional text.",
+            }
+        ],
+        temperature=0.2,
+        max_tokens=400,
+    )
+    print("Suggested schedule from AI:")
+    print(response.choices[0].message.content)
 
 
 # create task objects in timespan with llm calendar analysis
 # set confirm to True (default) to confirm before creating and saving task objects, false to add without confirmation
 def llm_create_tasks(timespan: timedelta, confirm: bool = True):
+    # need to get assignments from variety of sources:
+    # 
     pass
 
 
 if __name__ == "__main__":
     print("Starting client...")
+    auto_schedule_tasks_for_day()
     session = PromptSession()
     result = choice(
         message="Select an option:",
-        options=[(1, "Add Task"), (2, "View Tasks"), (3, "Get task from Apriltag"), (4, "Recommend Tasks from Calendars")],
+        options=[
+            (1, "Add Task"),
+            (2, "View Tasks"),
+            (3, "Get task from Apriltag"),
+            (4, "Recommend Tasks from Calendars"),
+        ],
     )
     if result == 1:
         task_manager.load_tasks_from_file()
@@ -190,8 +222,3 @@ if __name__ == "__main__":
     elif result == 4:
         print("Fetching recommended tasks from connected calendars...")
         recommend_tasks_from_calendars(timedelta(days=4))
-
-
-
-
-

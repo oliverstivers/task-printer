@@ -28,7 +28,7 @@ class Task:
     _duration = 0
     _task_id = None
     _print_time = None
-    _task_name = None
+    _task_name: str = ""
     _task_category = ""
     _parent_id = None
     _child_ids = []
@@ -46,7 +46,7 @@ class Task:
         recurrence=None,
     ):
         if due_date is None:
-            self._due_date = datetime.datetime.now() + datetime.timedelta(minutes=5)
+            self._due_date = datetime.datetime.now() + datetime.timedelta(minutes=15)
         else:
             self._due_date = due_date
         self._print_time = self._due_date + datetime.timedelta(
@@ -130,6 +130,8 @@ class Task:
             task_manager.relinquish_tag(self._tag_id)
         self._status = status
 
+    def get_string_for_schedule(self) -> str:
+        return self._task_name + " " + str(self._due_date)
     def get_receipt(self):
         # TODO: figure out task tree
         # tree should travel up to the top parent and display entire chain of tasks down to the furthest leaf
