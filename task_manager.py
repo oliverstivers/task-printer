@@ -53,7 +53,7 @@ def load_tasks_from_file() -> list[Task]:
         with open("tasks.pkl", "rb") as f:
             tasks = pickle.load(f)
             tasks_copy = tasks
-            
+
             print("Loaded tasks from file")
 
         with open("tagmap.pkl", "rb") as f:
@@ -106,11 +106,6 @@ def get_task_categories() -> list[str]:
         if task._task_category is not None:
             categories.add(task._task_category)
     return list(categories)
-
-
-def fetch_gcal_tasks():
-    """Fetch tasks from Google Calendar (TODO)"""
-    pass
 
 
 if __name__ == "__main__":

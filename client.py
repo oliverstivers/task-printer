@@ -89,27 +89,41 @@ def parse_task_input(input: str):
     print("\n".join(task.get_receipt()))
 
 
-# fetches tasks from connected calendars from the current time until time specified by timespan
-def recommend_tasks_from_calendars(timespan: timedelta):
+# analyzes coming obligations from calendars and suggests preparatory tasks to complete in advance
+def suggest_tasks_from_calendar(timespan: timedelta, auto_confirm: bool = True):
     calendar_tasks = gcal_quickstart.fetch_tasks_in_time_span(timespan)
-    # calendar tasks include things like lecture, which is not important for task recommendation
-    # we pass these tasks into an llm to analyze which are actual assignments/tasks that need to be done
     client = OpenAI(base_url="http://localhost:8080/v1", api_key="na")
     response = client.chat.completions.create(
         model="local",
         messages=[
             {
                 "role": "user",
-                "content": f"Analyze this list of calendar events: {calendar_tasks}. Identify actionable tasks or assignments (e.g., homework, projects, deadlines, exams) that require completion, and ignore non-actionable events like lectures, classes, meetings, or informational sessions. For each actionable task, provide a brief summary including the task name, due date if mentioned, and any key details. Return them as a simple, readable numbered list, like: 1. Task Name - Due: date - Details.",
+                "content": f"Analyze this list of calendar events: {calendar_tasks}. Identify upcoming obligations (e.g., exams, projects, deadlines, presentations). For each obligation, suggest preparatory tasks to complete a reasonable distance in advance, such as studying for exams, outlining projects, gathering resources, or practicing. Set reasonable due dates for these tasks before the obligation date. For each suggested task, provide a CLI command to create it, estimating duration in minutes. Format each command on a new line as: -n 'Task Name' -d 'YYYY-MM-DD' -c 'category' -l duration_minutes. Return only the commands, one per line.",
             }
         ],
         temperature=0.2,
         max_tokens=400,
     )
-    print("Recommended tasks from calendar analysis:")
-    print(response.choices[0].message.content)
+    tasks_data = response.choices[0].message.content
+    if not tasks_data:
+        print("No response from LLM.")
+        return
 
-    pass
+    commands_list = []
+    commands = tasks_data.strip().split("\n")
+    for cmd in commands:
+        cmd = cmd.strip()
+        if not cmd:
+            continue
+        if not auto_confirm:
+            print(f"Command: {cmd}")
+            ans = input("Confirm? (y/n): ").strip().lower()
+            if ans != "y":
+                continue
+        commands_list.append(cmd)
+    print("Commands to run:")
+    for cmd in commands_list:
+        print(cmd)
 
 
 # schudle tasks due for current day based on current gcal schedule
@@ -142,8 +156,38 @@ def auto_schedule_tasks_for_day(add_breaks: bool = True, break_length: int = 15)
 # set confirm to True (default) to confirm before creating and saving task objects, false to add without confirmation
 def llm_create_tasks(timespan: timedelta, confirm: bool = True):
     # need to get assignments from variety of sources:
-    # 
-    pass
+    # Currently only from Google Calendar
+    calendar_tasks = gcal_quickstart.fetch_tasks_in_time_span(timespan)
+    client = OpenAI(base_url="http://localhost:8080/v1", api_key="na")
+    response = client.chat.completions.create(
+        model="local",
+        messages=[
+            {
+                "role": "user",
+                "content": f"Analyze this list of calendar events: {calendar_tasks}. Identify actionable tasks or assignments (e.g., homework, projects, deadlines, exams) that require completion, and ignore non-actionable events like lectures, classes, meetings, or informational sessions. For each actionable task, provide a CLI-style command to create it, estimating a reasonable completion time in minutes based on the task details. Format each command on a new line as: -n 'Task Name' -d 'YYYY-MM-DD' -c 'details' -l duration_minutes. If no due date, omit -d. Use today's date if due date not mentioned. Return only the commands, one per line.",
+            }
+        ],
+        temperature=0.2,
+        max_tokens=400,
+    )
+    tasks_data = response.choices[0].message.content
+    if not tasks_data:
+        print("No response from LLM.")
+        return
+
+    commands_list = []
+    commands = tasks_data.strip().split("\n")
+    for cmd in commands:
+        cmd = cmd.strip()
+        if not cmd:
+            continue
+        print(f"Command: {cmd}")
+        ans = input("Confirm? (y/n): ").strip().lower()
+        if ans == "y":
+            commands_list.append(cmd)
+    print("Confirmed commands to run:")
+    for cmd in commands_list:
+        print(cmd)
 
 
 if __name__ == "__main__":
@@ -156,7 +200,7 @@ if __name__ == "__main__":
             (1, "Add Task"),
             (2, "View Tasks"),
             (3, "Get task from Apriltag"),
-            (4, "Recommend Tasks from Calendars"),
+            (4, "Suggest Prep Tasks from Obligations"),
         ],
     )
     if result == 1:
@@ -220,5 +264,5 @@ if __name__ == "__main__":
                 )
             )
     elif result == 4:
-        print("Fetching recommended tasks from connected calendars...")
-        recommend_tasks_from_calendars(timedelta(days=4))
+        print("Analyzing obligations and suggesting preparatory tasks...")
+        suggest_tasks_from_calendar(timedelta(days=4))
